@@ -10,11 +10,8 @@ def input_validation(func):
             return func(*args, **kwargs)
         except IndexError:
             return 'Please provide name and phone number'
-        except TypeError as e:
-            if str(e) == "'str' object is not callable":
-                return f"{args[0]} is not a valid command"
-            else:
-                print('Please provide a valid command')
+        except TypeError:
+            return f"{args[0]} is not a valid command"
 
     return wrapper
 
