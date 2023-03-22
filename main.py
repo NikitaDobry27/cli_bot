@@ -4,9 +4,20 @@ import re
 
 contacts = {}
 
+def input_validation(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except IndexError:
+            return 'Please provide name and phone number'
+        except TypeError as e:
+            if str(e) == "'str' object is not callable":
+                return f"{args[0]} is not a valid command"
+            else:
+                print('Please provide a valid command')
 
-def input_error():
-    pass
+    return wrapper
+
 
 def input_formatter(str):
     words_from_string = re.findall(r'\b\w+\b', str)
@@ -16,35 +27,67 @@ def input_formatter(str):
     data = words_from_string[1:]
     return command, data
 
-
-def command_parser(command):
+@input_validation
+def command_handler(command):
     for func, word in COMMANDS.items():
         if command in word:
             return func
+    return lambda x: f"{command} is not a valid command"
 
-
+@input_validation
 def hello(*args, **kwargs):
     return 'Hi! How can I help you'
 
+@input_validation
 def add_contact(*args, **kwargs):
-    pass
+    lst = args[0]
+    name = lst[0]
+    phone =lst[1]  
+    
+    if len(lst) < 2:
+        return 'name or phone number is missing'
+    if len(phone) > 15 or len(phone) < 9:
+        return f'{phone} is not valid'
+    contacts[name] = phone
+    return 'Contact successfully added'
 
+
+@input_validation
 def change(*args, **kwargs):
-    pass
+    lst = args[0]
+    name = lst[0]
+    phone = lst[1]
+    
+    if name in contacts.keys():
+        contacts[name] = phone
+        return f'Phone number for contact {name} was successfully changed'
 
+    else:
+        return f'There is no such contact with name {name}'
+
+
+@input_validation
 def phone(*args, **kwargs):
     pass
 
-def show_all(*args, **kwargs):
-    pass
 
-def close(*args, **kwargs):
-    pass
+
+def show_all(*args, **kwargs):
+    if not contacts:
+        return 'Your contacts list is empty'
+    result = ''
+    for k, v in contacts.items():
+        result += f'\n{k.capitalize()}: {v}\n'
+    return result
 
 COMMANDS = {
         hello: ['hi', 'hello', 'hey'],
-        add_contact: ['add']
+        add_contact: ['add'],
+        change: ['change'],
+        phone: ['phone'],
+        show_all: ['show']
     }
+
 
 def main():
     while True:
@@ -54,12 +97,12 @@ def main():
             print('See you!')
             return False
         
-        call, data = input_formatter(user_input)
+        command, data = input_formatter(user_input)
 
-        command = command_parser(call)
+        call = command_handler(command)
         
-        if command:
-            print(command(data))
+        
+        print(call(data))
         
 
     # add_contact(user_input)
