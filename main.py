@@ -57,7 +57,7 @@ def change(*args, **kwargs):
     
     if name in contacts.keys():
         contacts[name] = phone
-        return f'Phone number for contact {name} was successfully changed'
+        return f'Phone number for contact {name.capitalize()} was successfully changed'
 
     else:
         return f'There is no such contact with name {name}'
